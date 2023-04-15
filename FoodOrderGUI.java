@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class FoodOrderGUI extends JFrame implements ActionListener {
@@ -76,7 +78,7 @@ public class FoodOrderGUI extends JFrame implements ActionListener {
         dineInTakeOutPanel.add(dineInRadioButton);
         dineInTakeOutPanel.add(takeOutRadioButton);
 
-        JPanel discountPanel= new JPanel(new GridLayout(1, 2));
+        JPanel discountPanel = new JPanel(new GridLayout(1, 2));
         discountPanel.setBorder(BorderFactory.createTitledBorder("Discount"));
         discountPanel.add(studentDiscountRadioButton);
         discountPanel.add(seniorDiscountRadioButton);
@@ -85,15 +87,15 @@ public class FoodOrderGUI extends JFrame implements ActionListener {
         buttonPanel.add(calculateButton);
         buttonPanel.add(printButton);
         buttonPanel.add(clearButton);
-    
+
         JPanel paymentPanel = new JPanel(new FlowLayout());
         paymentPanel.add(new JLabel("Payment: "));
         paymentPanel.add(paymentField);
-    
+
         JPanel receiptPanel = new JPanel(new BorderLayout());
         receiptPanel.add(new JScrollPane(receiptArea), BorderLayout.CENTER);
         receiptPanel.add(paymentPanel, BorderLayout.SOUTH);
-    
+
         JPanel mainPanel = new JPanel(new GridLayout(3, 1));
         mainPanel.add(new JLabel("Main Dish:"));
         mainPanel.add(mainDishPanel);
@@ -101,32 +103,64 @@ public class FoodOrderGUI extends JFrame implements ActionListener {
         mainPanel.add(drinkPanel);
         mainPanel.add(new JLabel("Dessert:"));
         mainPanel.add(dessertPanel);
-    
+
         JPanel optionsPanel = new JPanel(new GridLayout(2, 1));
         optionsPanel.add(dineInTakeOutPanel);
         optionsPanel.add(discountPanel);
-    
+
         JPanel mainPanelWrapper = new JPanel(new BorderLayout());
         mainPanelWrapper.add(new JLabel("Select your order: "), BorderLayout.NORTH);
         mainPanelWrapper.add(mainPanel, BorderLayout.CENTER);
         mainPanelWrapper.add(optionsPanel, BorderLayout.SOUTH);
-    
+
         add(mainPanelWrapper, BorderLayout.WEST);
         add(buttonPanel, BorderLayout.SOUTH);
         add(receiptPanel, BorderLayout.EAST);
-    
+
         foodOrder = new FoodOrder();
-    
+
         calculateButton.addActionListener(this);
         printButton.addActionListener(this);
         clearButton.addActionListener(this);
-    
+
         setTitle("Food Order GUI");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setVisible(true);
     }
-    
+
+    private void showReceiptWindow(String receipt) {
+        JFrame receiptWindow = new JFrame("Order Receipt");
+        receiptWindow.setLayout(new BorderLayout());
+
+        String restaurantName = "Kainan ni Juan";
+        String place = "Tarlac";
+
+        String orderDetails = receipt.replaceAll("\n", "<br>");
+
+        String htmlReceipt = "<html><body>"
+                + "<div style='text-align:center;'>"
+                + "<h2>" + restaurantName + "</h2>"
+                + "<p>" + place + "</p>"
+                + "<h3>Order Receipt</h3>"
+                + "<hr>"
+                + orderDetails
+                + "<hr>"
+                + "<h4>Thank you for buying!</h4>"
+                + "</div>"
+                + "</body></html>";
+
+        JLabel receiptLabel = new JLabel(htmlReceipt);
+        receiptLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(receiptLabel);
+        receiptWindow.add(scrollPane, BorderLayout.CENTER);
+
+        receiptWindow.pack();
+        receiptWindow.setLocationRelativeTo(null);
+        receiptWindow.setVisible(true);
+    }
+
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == calculateButton) {
             foodOrder = new FoodOrder();
@@ -159,94 +193,98 @@ public class FoodOrderGUI extends JFrame implements ActionListener {
                     } else if (dessertCheckBox.getText().equals("Cake - $4.00")) {
                         foodOrder.addItem(new Dessert("Cake", 4.00));
                     } else if (dessertCheckBox.getText().equals("Pie - $4.00")) {
-                    foodOrder.addItem(new Dessert("Pie", 4.00));
+                        foodOrder.addItem(new Dessert("Pie", 4.00));
                     }
-                    }
-                    }
-                        if (dineInRadioButton.isSelected()) {
-                        foodOrder.setDineIn(true);
-                        } else if (takeOutRadioButton.isSelected()) {
-                        foodOrder.setDineIn(false);
-                    }
-                        if (studentDiscountRadioButton.isSelected()) {
-                        foodOrder.setStudentDiscount(true);
-                        } else if (seniorDiscountRadioButton.isSelected()) {
-                        foodOrder.setSeniorDiscount(true);
-                    }
-                        double total = foodOrder.calculateTotal();
-                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                        receiptArea.setText("Total: $" + decimalFormat.format(total));
-                        } else if (e.getSource() == printButton) {
-                        double total = foodOrder.calculateTotal();
-                        double payment;
-                        try {
-                        payment = Double.parseDouble(paymentField.getText());
-                        if (payment < total) {
-                        throw new IllegalArgumentException("Payment is insufficient.");
-                        }
-                        } catch (NumberFormatException ex) {
-                        receiptArea.setText("Invalid payment amount.");
-                        return;
-                        } catch (IllegalArgumentException ex) {
-                        receiptArea.setText(ex.getMessage());
-                        return;
-                        }
-                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-                        String receipt = "Food Order Receipt\n\n";
-                        receipt += "Main Dishes:\n";
-                        for (JCheckBox mainDishCheckBox : mainDishCheckBoxes) {
-                        if (mainDishCheckBox.isSelected()) {
-                        receipt += mainDishCheckBox.getText() + "\n";
-                        }
-                        }
-                        receipt += "\nDrinks:\n";
-                        for (JCheckBox drinkCheckBox : drinkCheckBoxes) {
-                        if (drinkCheckBox.isSelected()) {
-                        receipt += drinkCheckBox.getText() + "\n";
-                        }
-                        }
-                        receipt += "\nDesserts:\n";
-                        for (JCheckBox dessertCheckBox : dessertCheckBoxes) {
-                        if (dessertCheckBox.isSelected()) {
-                        receipt += dessertCheckBox.getText() + "\n";
-                        }
-                        }
-                        receipt += "\nOptions:\n";
-                        if (dineInRadioButton.isSelected()) {
-                        receipt += "Dine In\n";
-                        } else {
-                        receipt += "Take Out\n";
-                        }
-                        if (studentDiscountRadioButton.isSelected()) {
-                        receipt += "Student Discount - 10%\n";
-                        } else if (seniorDiscountRadioButton.isSelected()) {
-                        receipt += "Senior Discount - 20%\n";
-                        }
-                        receipt += "\nTotal: $" + decimalFormat.format(total) + "\n";
-                        receipt += "Payment: $" + decimalFormat.format(payment) + "\n";
-                        receipt += "Change: $" + decimalFormat.format(payment - total) + "\n";
-                        receiptArea.setText(receipt);
-                        } else if (e.getSource() == clearButton) {
-                        for (JCheckBox mainDishCheckBox : mainDishCheckBoxes) {
-                        mainDishCheckBox.setSelected(false);
-                        }
-                        for (JCheckBox drinkCheckBox : drinkCheckBoxes) {
-                        drinkCheckBox.setSelected(false);
-                        }
-                        for (JCheckBox dessertCheckBox : dessertCheckBoxes) {
-                        dessertCheckBox.setSelected(false);
-                        }
-                        dineInRadioButton.setSelected(false);
-                        takeOutRadioButton.setSelected(false);
-                        studentDiscountRadioButton.setSelected(false);
-                        seniorDiscountRadioButton.setSelected(false);
-                        paymentField.setText("");
-                        receiptArea.setText("");
-                    }
-                    }
+                }
+            }
+            if (dineInRadioButton.isSelected()) {
+                foodOrder.setDineIn(true);
+            } else if (takeOutRadioButton.isSelected()) {
+                foodOrder.setDineIn(false);
+            }
+            if (studentDiscountRadioButton.isSelected()) {
+                foodOrder.setStudentDiscount(true);
+            } else if (seniorDiscountRadioButton.isSelected()) {
+                foodOrder.setSeniorDiscount(true);
+            }
+            double total = foodOrder.calculateTotal();
+            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            receiptArea.setText("Total: $" + decimalFormat.format(total));
+        } else if (e.getSource() == printButton) {
+            double subtotal = foodOrder.calculateSubtotal();
+            double total = foodOrder.calculateTotal();
+            String orderDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            double payment;
+            try {
+                payment = Double.parseDouble(paymentField.getText());
+                if (payment < total) {
+                    throw new IllegalArgumentException("Payment is insufficient.");
+                }
+            } catch (NumberFormatException ex) {
+                receiptArea.setText("Invalid payment amount.");
+                return;
+            } catch (IllegalArgumentException ex) {
+                receiptArea.setText(ex.getMessage());
+                return;
+            }
+            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            String receipt = "Food Order Receipt\n\n";
+            receipt += "Main Dishes:\n";
+            for (JCheckBox mainDishCheckBox : mainDishCheckBoxes) {
+                if (mainDishCheckBox.isSelected()) {
+                    receipt += mainDishCheckBox.getText() + "\n";
+                }
+            }
+            receipt += "\nDrinks:\n";
+            for (JCheckBox drinkCheckBox : drinkCheckBoxes) {
+                if (drinkCheckBox.isSelected()) {
+                    receipt += drinkCheckBox.getText() + "\n";
+                }
+            }
+            receipt += "\nDesserts:\n";
+            for (JCheckBox dessertCheckBox : dessertCheckBoxes) {
+                if (dessertCheckBox.isSelected()) {
+                    receipt += dessertCheckBox.getText() + "\n";
+                }
+            }
+            receipt += "\nOptions:\n";
+            if (dineInRadioButton.isSelected()) {
+                receipt += "Dine In\n";
+            } else {
+                receipt += "Take Out\n";
+            }
+            receipt += "\nSubtotal: $" + decimalFormat.format(subtotal) + "\n";
+            if (studentDiscountRadioButton.isSelected()) {
+                receipt += "Student Discount - 10%\n";
+            } else if (seniorDiscountRadioButton.isSelected()) {
+                receipt += "Senior Discount - 20%\n";
+            }
+            receipt += "Total (after discount): $" + decimalFormat.format(total) + "\n";
+            receipt += "Payment: $" + decimalFormat.format(payment) + "\n";
+            receipt += "Change: $" + decimalFormat.format(payment - total) + "\n";
+            receipt += "\nOrder Date: " + orderDate + "\n";
+            receiptArea.setText(receipt);
+            showReceiptWindow(receipt);
+        } else if (e.getSource() == clearButton) {
+            for (JCheckBox mainDishCheckBox : mainDishCheckBoxes) {
+                mainDishCheckBox.setSelected(false);
+            }
+            for (JCheckBox drinkCheckBox : drinkCheckBoxes) {
+                drinkCheckBox.setSelected(false);
+            }
+            for (JCheckBox dessertCheckBox : dessertCheckBoxes) {
+                dessertCheckBox.setSelected(false);
+            }
+            dineInRadioButton.setSelected(false);
+            takeOutRadioButton.setSelected(false);
+            studentDiscountRadioButton.setSelected(false);
+            seniorDiscountRadioButton.setSelected(false);
+            paymentField.setText("");
+            receiptArea.setText("");
+        }
+    }
 
-                    public static void main(String[] args) {
-                    new FoodOrderGUI();
-                    }
-                    }
-                        
+    public static void main(String[] args) {
+        new FoodOrderGUI();
+    }
+}
