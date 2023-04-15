@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+
 public class FoodOrder {
     private ArrayList<MenuItem> items;
     private boolean isDineIn;
@@ -35,11 +36,9 @@ public class FoodOrder {
     public double calculateTotal() {
         double total = 0;
 
-    
         for (MenuItem item : items) {
             total += item.getPrice();
         }
-
 
         if (hasStudentDiscount) {
             total *= 0.1;
@@ -47,8 +46,14 @@ public class FoodOrder {
             total *= 0.2;
         }
 
-      
-    
         return total;
+    }
+
+    public double calculateSubtotal() {
+        double subtotal = 0.0;
+        for (MenuItem item : items) {
+            subtotal += item.getPrice();
+        }
+        return subtotal;
     }
 }
